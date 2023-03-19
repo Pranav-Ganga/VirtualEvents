@@ -2,20 +2,20 @@ import { useUserData } from "@nhost/react";
 import { useNavigation } from "@react-navigation/native";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { ActivityIndicator } from "react-native";
-import { StreamChat,Channel } from 'stream-chat';
+import { StreamChat, Channel } from 'stream-chat';
 import { OverlayProvider, Chat } from 'stream-chat-expo';
 
 
-type ChatContextType ={
+type ChatContextType = {
     currentChannel: Channel;
 };
 
-export const ChatContext = createContext<ChatContextType>({currentChannel: undefined});
+export const ChatContext = createContext<ChatContextType>({ currentChannel: undefined });
 
 const ChatContextProvider = ({ children }: { children: React.ReactNode }) => {
     //component
     const [chatClient, setChatClient] = useState<StreamChat>();
-    const [currentChannel, setCurrentChannel]= useState<Channel>();
+    const [currentChannel, setCurrentChannel] = useState<Channel>();
     const navigation = useNavigation();
 
     const user = useUserData();
@@ -59,26 +59,47 @@ const ChatContextProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }, [])
 
-    const startDMChatRoom = async (chatWithUser)=>{
-        if(!chatClient){
+    const startDMChatRoom = async (chatWithUser) => {
+        if (!chatClient) {
             return;
         }
 
-        const newChannel = chatClient.channel("messaging",{
-            members:[chatClient.userID,chatWithUser.id],
+        const newChannel = chatClient.channel("messaging", {
+            members: [chatClient.userID, chatWithUser.id],
         });
 
         await newChannel.watch();
         setCurrentChannel(newChannel);
-      
+
         navigation.replace("ChatRoom");
-    }
+    };
+
+    const joinEventChatRoom = async (event) => {
+        if (!chatClient) {
+            return;
+        }
+        const channelId = `room-${event.id}`;
+        const eventChannel = chatClient.channel('livestream', channelId, {
+            name: event.name,
+        });
+
+        await eventChannel.watch({ watchers: { limit: 100 } });
+        setCurrentChannel(eventChannel);
+
+        navigation.navigate("Root", {
+            screen: "Chat",
+        });
+        navigation.navigate("Root", {
+            screen: "Chat",
+            params: { screen: "ChatRoom" },
+        });
+    };
 
     if (!chatClient) {
         return <ActivityIndicator />;
     }
 
-    const value = { chatClient, currentChannel, setCurrentChannel,startDMChatRoom };
+    const value = { chatClient, currentChannel, setCurrentChannel, startDMChatRoom,joinEventChatRoom };
     return (
         <OverlayProvider>
             <Chat client={chatClient}>

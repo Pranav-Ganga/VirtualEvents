@@ -31,6 +31,7 @@ import {
 import LinkingConfiguration from "./LinkingConfiguration";
 import { useAuthenticationStatus } from "@nhost/react";
 import ChatStackNavigator from "./ChatStackNavigator";
+import ChatContextProvider from "../Context/ChatContext";
 
 export default function Navigation({
   colorScheme,
@@ -78,6 +79,7 @@ function RootNavigator() {
   }
 
   return (
+    <ChatContextProvider>
     <Stack.Navigator>
       <Stack.Screen
         name="Root"
@@ -93,6 +95,7 @@ function RootNavigator() {
         <Stack.Screen name="Event" component={ModalScreen} />
       </Stack.Group>
     </Stack.Navigator>
+    </ChatContextProvider>
   );
 }
 

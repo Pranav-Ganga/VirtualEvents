@@ -10,7 +10,7 @@ const Stack = createNativeStackNavigator();
 
 export default () => {
     return (
-        <ChatContextProvider>
+       
             <Stack.Navigator>
                 <Stack.Screen name="Chats" component={ChatsScreen} options={({ navigation }) => ({
                     headerRight: () => (
@@ -35,7 +35,7 @@ export default () => {
                     <Stack.Screen name="Users" component={UsersScreen} />
                 </Stack.Group>
             </Stack.Navigator>
-        </ChatContextProvider>
+       
 
     )
 }
