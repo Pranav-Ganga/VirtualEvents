@@ -23,7 +23,6 @@ const UsersScreen = () => {
     return <Text>{error.message}</Text>;
   }
 
-  console.log(JSON.stringify(data, null, 2));
 
   return (
     <FlatList

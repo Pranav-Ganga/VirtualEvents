@@ -1,12 +1,15 @@
 import { useUserData } from "@nhost/react";
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { StreamChat } from 'stream-chat';
+import { ActivityIndicator } from "react-native";
+import { StreamChat,Channel } from 'stream-chat';
+import { OverlayProvider, Chat } from 'stream-chat-expo';
 
 export const ChatContext = createContext({});
 
 const ChatContextProvider = ({ children }: { children: React.ReactNode }) => {
     //component
-    const [chatClient, setChatClient]= useState<StreamChat>();
+    const [chatClient, setChatClient] = useState<StreamChat>();
+    const [currentChannel, setCurrentChannel]= useState<Channel>();
 
     const user = useUserData();
 
@@ -28,7 +31,12 @@ const ChatContextProvider = ({ children }: { children: React.ReactNode }) => {
 
             setChatClient(client);
 
-            const globalChannel= client.channel("livestream","global",{name:"pranav",});
+            const globalChannel = client.channel(
+                "livestream",
+                "global",
+                {
+                    name: "pranav",
+                });
 
             await globalChannel.watch();
         };
@@ -36,17 +44,26 @@ const ChatContextProvider = ({ children }: { children: React.ReactNode }) => {
         initChat();
     }, []);
 
-    useEffect(()=>{
-        return()=>{
-            if(chatClient){
+    useEffect(() => {
+        return () => {
+            if (chatClient) {
                 chatClient.disconnectUser();
             }
         }
-    },[])
+    }, [])
 
-    const value = { username: "Pranav" };
+    if (!chatClient) {
+        return <ActivityIndicator />;
+    }
+
+    const value = { chatClient, currentChannel, setCurrentChannel };
     return (
-        <ChatContext.Provider value={value}>{children}</ChatContext.Provider>
+        <OverlayProvider>
+            <Chat client={chatClient}>
+                <ChatContext.Provider value={value}>{children}</ChatContext.Provider>
+            </Chat>
+        </OverlayProvider>
+
     )
 };
 
