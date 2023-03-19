@@ -4,7 +4,11 @@ import { ActivityIndicator } from "react-native";
 import { StreamChat,Channel } from 'stream-chat';
 import { OverlayProvider, Chat } from 'stream-chat-expo';
 
-export const ChatContext = createContext({});
+type ChatContextType ={
+    currentChannel: Channel;
+};
+
+export const ChatContext = createContext<ChatContextType>({currentChannel: undefined});
 
 const ChatContextProvider = ({ children }: { children: React.ReactNode }) => {
     //component
