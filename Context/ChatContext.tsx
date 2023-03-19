@@ -1,8 +1,10 @@
 import { useUserData } from "@nhost/react";
+import { useNavigation } from "@react-navigation/native";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { ActivityIndicator } from "react-native";
 import { StreamChat,Channel } from 'stream-chat';
 import { OverlayProvider, Chat } from 'stream-chat-expo';
+
 
 type ChatContextType ={
     currentChannel: Channel;
@@ -14,6 +16,7 @@ const ChatContextProvider = ({ children }: { children: React.ReactNode }) => {
     //component
     const [chatClient, setChatClient] = useState<StreamChat>();
     const [currentChannel, setCurrentChannel]= useState<Channel>();
+    const navigation = useNavigation();
 
     const user = useUserData();
 
@@ -56,18 +59,32 @@ const ChatContextProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }, [])
 
+    const startDMChatRoom = async (chatWithUser)=>{
+        if(!chatClient){
+            return;
+        }
+
+        const newChannel = chatClient.channel("messaging",{
+            members:[chatClient.userID,chatWithUser.id],
+        });
+
+        await newChannel.watch();
+        setCurrentChannel(newChannel);
+      
+        navigation.replace("ChatRoom");
+    }
+
     if (!chatClient) {
         return <ActivityIndicator />;
     }
 
-    const value = { chatClient, currentChannel, setCurrentChannel };
+    const value = { chatClient, currentChannel, setCurrentChannel,startDMChatRoom };
     return (
         <OverlayProvider>
             <Chat client={chatClient}>
                 <ChatContext.Provider value={value}>{children}</ChatContext.Provider>
             </Chat>
         </OverlayProvider>
-
     )
 };
 
